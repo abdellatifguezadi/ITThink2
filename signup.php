@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     </script>
 </head>
-<body class="bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center h-screen">
+<body class="bg-purple-300 flex items-center justify-center h-screen">
     <div class="bg-white p-10 rounded-lg shadow-lg w-96">
         <img src="pic/siag_917x600.jpg" alt="Image d'inscription" class="w-full h-32 object-cover rounded-lg mb-4"> 
         <h2 class="text-3xl font-bold text-center mb-6">Inscription</h2>
