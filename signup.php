@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     </script>
 </head>
-<body class="bg-purple-300 flex items-center justify-center h-screen">
+<body class="bg-blue-500 flex items-center justify-center h-screen">
     <div class="bg-white p-10 rounded-lg shadow-lg w-96">
         <img src="pic/siag_917x600.jpg" alt="Image d'inscription" class="w-full h-32 object-cover rounded-lg mb-4"> 
         <h2 class="text-3xl font-bold text-center mb-6">Inscription</h2>
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" name="nom_utilisateur" placeholder="Nom d'utilisateur" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             <input type="email" name="email" placeholder="Email" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             <input type="password" name="password" placeholder="Mot de passe" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            <button type=" submit" class="bg-green-600 text-white p-3 rounded-lg w-full hover:bg-green-700 transition duration-200">S'inscrire</button>
+            <button type=" submit" class="bg-blue-500 text-white p-3 rounded-lg w-full hover:bg-green-700 transition duration-200">S'inscrire</button>
         </form>
 
         <?php if (isset($error)) echo "<p class='text-red-500 mt-4 text-center'>$error</p>"; ?>
