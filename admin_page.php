@@ -1,16 +1,21 @@
 <?php
 session_start();
-require 'db_connection.php'; // Inclure le fichier de connexion à la base de données
+require 'db_connection.php'; 
 
 // Vérification si l'utilisateur est connecté et est un administrateur
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'admin') {
-    header('Location: login.php'); // Redirection vers la page de connexion si non autorisé
+    header('Location: login.php'); 
     exit();
 }
 
 // Récupération des données
 $offres = $pdo->query("SELECT * FROM offres")->fetchAll(PDO::FETCH_ASSOC);
-$projets = $pdo->query("SELECT * FROM projets")->fetchAll(PDO::FETCH_ASSOC);
+$projets = $pdo->query("
+    SELECT p.*, u.nom_utilisateur , c.nom_categorie
+    FROM projets p 
+    JOIN utilisateurs u ON p.id_utilisateur = u.id_utilisateur
+    JOIN categories c ON p.id_categorie = c.id_categorie
+")->fetchAll(PDO::FETCH_ASSOC);
 $utilisateurs = $pdo->query("SELECT * FROM utilisateurs")->fetchAll(PDO::FETCH_ASSOC);
 $freelances = $pdo->query("SELECT * FROM freelances")->fetchAll(PDO::FETCH_ASSOC);
 $categorier = $pdo->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSOC);
@@ -34,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE projets SET titre_projet = ?, description = ? WHERE id_projet = ?");
         $stmt->execute([$titre_projet, $description, $id_projet]);
 
-        // Redirection pour éviter le renvoi du formulaire
         header('Location: admin_page.php');
         exit();
     }
@@ -46,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("DELETE FROM projets WHERE id_projet = ?");
         $stmt->execute([$id_projet]);
 
-        // Redirection pour éviter le renvoi du formulaire
         header('Location: admin_page.php');
         exit();
     }
@@ -61,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO projets (titre_projet, description, id_categorie, id_utilisateur) VALUES (?, ?, ?, ?)");
         $stmt->execute([$titre_projet, $description, $id_categorie, $id_utilisateur]);
 
-        // Redirection pour éviter le renvoi du formulaire
         header('Location: admin_page.php');
         exit();
     }
@@ -212,12 +214,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <td class="border border-gray-200 p-2"><?php echo $projet['id_projet']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $projet['titre_projet']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $projet['description']; ?></td>
-                        <td class="border border-gray-200 p-2"><?php echo $projet['id_categorie']; ?></td>
-                        <td class="border border-gray-200 p-2"><?php echo $projet['id_utilisateur']; ?></td>
+                        <td class="border border-gray-200 p-2"><?php echo $projet['nom_categorie']; ?></td>
+                        <td class="border border-gray-200 p-2"><?php echo $projet['nom_utilisateur']; ?></td>
                         <td class="border border-gray-200 p-2">
                             
                             <button onclick="showUpdateForm(<?php echo $projet['id_projet']; ?>, '<?php echo addslashes($projet['titre_projet']); ?>', '<?php echo addslashes($projet['description']); ?>')" class="bg-yellow-500 text-white p-1 rounded">Update</button>
-                            <!-- Formulaire de suppression -->
                             <form method="POST" action="" class="inline">
                                 <input type="hidden" name="id_projet" value="<?php echo $projet['id_projet']; ?>">
                                 <button type="submit" name="delete_projet" class="bg-red-600 text-white p-1 rounded">Delete</button>
