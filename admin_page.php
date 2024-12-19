@@ -24,6 +24,7 @@ $sous_categorier = $pdo->query("
     FROM sous_categories sc
     JOIN categories c ON sc.id_categorie = c.id_categorie
 ")->fetchAll(PDO::FETCH_ASSOC);
+$Temoignages = $pdo->query("SELECT * FROM temoignages")->fetchAll(PDO::FETCH_ASSOC);
 
 $totalUtilisateurs = $pdo->query("SELECT COUNT(*) FROM utilisateurs")->fetchColumn();
 $totalFreelancers = $pdo->query("SELECT COUNT(*) FROM freelances")->fetchColumn();
@@ -34,21 +35,7 @@ $totalOffres = $pdo->query("SELECT COUNT(*) FROM offres")->fetchColumn();
 
 // Gestion des actions de mise à jour et de suppression
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    if (isset($_POST['update_projet'])) {
-        $id_projet = $_POST['id_projet'];
-        $titre_projet = $_POST['titre_projet'];
-        $description = $_POST['description'];
-        $etat = $_POST['etat'];
 
-        $stmt = $pdo->prepare("UPDATE projets SET titre_projet = ?, description = ?, etat = ? WHERE id_projet = ?");
-        $stmt->execute([$titre_projet, $description, $etat, $id_projet]);
-
-        header('Location: admin_page.php');
-        exit();
-    }
-
-    
     if (isset($_POST['delete_projet'])) {
         $id_projet = $_POST['id_projet'];
 
@@ -59,15 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    
+    if(isset($_POST['delete_Temoignages'])){
+        $id_Temoignages = $_POST['id_temoignages'];
 
+        $stmt = $pdo -> prepare("DELETE FROM temoignages WHERE id_temoignages = ?");
+        $stmt -> execute([$id_temoignages]);
+        header('location : admin_page.php');
+        exit();
+    }
 
-    
-
-    
-    
-
-    
     if (isset($_POST['delete_utilisateur'])) {
         $id_utilisateur = $_POST['id_utilisateur'];
 
@@ -78,8 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    
-
     if (isset($_POST['delete_freelancer'])) {
         $id_freelance = $_POST['id_freelance'];
 
@@ -89,9 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: admin_page.php');
         exit();
     }
-
-    
-    
 
     
     if (isset($_POST['etat'])) {
@@ -175,8 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -218,6 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li class="h-16 flex items-center mb-2 text-white">
             <i class="fa-solid fa-list mr-2"></i>
             <a href="#" class="text-white hover:underline" onclick="showSection('sous_categories')">Sous Catégories</a>
+        </li>
+        <li class="h-16 flex items-center mb-2 text-white">
+            <i class="fa-solid fa-list mr-2"></i>
+            <a href="#" class="text-white hover:underline" onclick="showSection('Temoignages')">Temoignages</a>
         </li>
     </ul>
 </div>
@@ -315,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th class="border border-gray-200 p-2">Catégorie ID</th>
                         <th class="border border-gray-200 p-2">Utilisateur ID</th>
                         <th class="border border-gray-200 p-2">État</th>
-                        <th class="border border-gray-200 p-2">Actions</th>
+                        <th class="border border-gray-200 p-2 w-72">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -327,14 +311,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <td class="border border-gray-200 p-2"><?php echo $projet['nom_categorie']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $projet['nom_utilisateur']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $projet['etat']; ?></td>
-                        <td class="border border-gray-200 p-2">
+                        <td class="border border-gray-200 p-2 flex justify-around">
                             
-                        <button onclick="showUpdateForm(<?php echo $projet['id_projet']; ?>, '<?php echo addslashes($projet['titre_projet']); ?>', '<?php echo addslashes($projet['description']); ?>', '<?php echo addslashes($projet['etat']); ?>')" class="bg-yellow-500 text-white p-1 rounded">Update</button>
+                        <button onclick="showUpdateForm(<?php echo $projet['id_projet']; ?>,  '<?php echo addslashes($projet['etat']); ?>')" class="bg-yellow-500 text-white p-1 rounded w-32 ">Update</button>
 
                         <form method="POST" action="confirm_delete.php">
                             <input type="hidden" name="id_projet" value="<?php echo $projet['id_projet']; ?>">
                             <input type="hidden" name="type" value="projet">
-                            <button type="submit" class="bg-red-600 text-white p-1 rounded">Delete</button>
+                            <button type="submit" class="bg-red-600 text-white p-1 rounded w-32 ">Delete</button>
                         </form>
                         </td>
                     </tr>
@@ -350,14 +334,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3 class="text-lg font-bold text-gray-800 mb-4">Mettre à jour le projet</h3>
                 <form method="POST" action="">
                     <input type="hidden" name="id_projet" id="update_id_projet">
-                    <div class="mb-4">
-                        <label for="update_titre_projet" class="block text-sm font-medium text-gray-700">Titre</label>
-                        <input type="text" name="titre_projet" id="update_titre_projet" placeholder="Titre" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="update_description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <input type="text" name="description" id="update_description" placeholder="Description" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
-                    </div>
                     <div class="mb-4">
                         <label for="update_etat" class="block text-sm font-medium text-gray-700">État</label>
                         <select name="etat" id="update_etat" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500">
@@ -398,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <form method="POST" action="confirm_delete.php">
                                     <input type="hidden" name="id_utilisateur" value="<?php echo $utilisateur['id_utilisateur']; ?>">
                                     <input type="hidden" name="type" value="utilisateur">
-                                    <button type="submit" class="bg-red-600 text-white p-1 rounded">Delete</button>
+                                    <button type="submit" class="bg-red-600 text-white p-1 rounded w-full">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -430,7 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <form method="POST" action="confirm_delete.php">
                                 <input type="hidden" name="id_freelance" value="<?php echo $freelance['id_freelance']; ?>">
                                 <input type="hidden" name="type" value="freelance">
-                                <button type="submit" class="bg-red-600 text-white p-1 rounded">Delete</button>
+                                <button type="submit" class="bg-red-600 text-white p-1 rounded w-full">Delete</button>
                             </form>   
                             </td>
                         </tr>
@@ -446,7 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tr>
                         <th class="border border-gray-200 p-2">ID Catégorie</th>
                         <th class="border border-gray-200 p-2">Nom</th>
-                        <th class="border border-gray-200 p-2">Actions</th>
+                        <th class="border border-gray-200 p-2 w-96">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -454,13 +430,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tr>
                         <td class="border border-gray-200 p-2"><?php echo $categorie['id_categorie']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $categorie['nom_categorie']; ?></td>
-                        <td class="border border-gray-200 p-2">
-                            <button onclick="showUpdateCategoryForm(<?php echo $categorie['id_categorie']; ?>, '<?php echo addslashes($categorie['nom_categorie']); ?>')" class="bg-yellow-500 text-white p-1 rounded">Update</button>
+                        <td class="border border-gray-200 p-2 flex justify-around">
+                            <button onclick="showUpdateCategoryForm(<?php echo $categorie['id_categorie']; ?>, '<?php echo addslashes($categorie['nom_categorie']); ?>')" class="bg-yellow-500 text-white p-1 rounded w-40 ">Update</button>
 
                             <form method="POST" action="confirm_delete.php">
                                 <input type="hidden" name="id_categorie" value="<?php echo $categorie['id_categorie']; ?>">
                                 <input type="hidden" name="type" value="categorie">
-                                <button type="submit" class="bg-red-600 text-white p-1 rounded">Delete</button>
+                                <button type="submit" class="bg-red-600 text-white p-1 rounded w-40 ">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -503,7 +479,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th class="border border-gray-200 p-2">ID Sous-Catégorie</th>
                         <th class="border border-gray-200 p-2">Nom</th>
                         <th class="border border-gray-200 p-2">Catégorie</th> 
-                        <th class="border border-gray-200 p-2">Actions</th>
+                        <th class="border border-gray-200 p-2 w-96">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -511,14 +487,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tr>
                         <td class="border border-gray-200 p-2"><?php echo $sous_categorie['id_sous_categorie']; ?></td>
                         <td class="border border-gray-200 p-2"><?php echo $sous_categorie['nom_sous_categorie']; ?></td>
-                        <td class="border border-gray-200 p-2"><?php echo $sous_categorie['nom_categorie']; ?></td> <!-- Affichage du nom de la catégorie -->
-                        <td class="border border-gray-200 p-2">
-                            <button onclick="showUpdateSousCategoryForm(<?php echo $sous_categorie['id_sous_categorie']; ?>, '<?php echo addslashes($sous_categorie['nom_sous_categorie']); ?>', <?php echo $sous_categorie['id_categorie']; ?>)" class="bg-yellow-500 text-white p-1 rounded">Update</button>
+                        <td class="border border-gray-200 p-2"><?php echo $sous_categorie['nom_categorie']; ?></td> 
+                        <td class="border border-gray-200 p-2 flex justify-around">
+                            <button onclick="showUpdateSousCategoryForm(<?php echo $sous_categorie['id_sous_categorie']; ?>, '<?php echo addslashes($sous_categorie['nom_sous_categorie']); ?>', <?php echo $sous_categorie['id_categorie']; ?>)" class="bg-yellow-500 text-white p-1 rounded w-40 ">Update</button>
 
-                            <form method="POST" action="confirm_delete.php">
+                            <form method="POST" action="confirm_delete.php" >
                                 <input type="hidden" name="id_sous_categorie" value="<?php echo $sous_categorie['id_sous_categorie']; ?>">
                                 <input type="hidden" name="type" value="sous_categorie">
-                                <button type="submit" class="bg-red-600 text-white p-1 rounded">Delete</button>
+                                <button type="submit" class="bg-red-600 text-white p-1 rounded w-40">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -567,22 +543,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
             </div>
         </div>
+        <div id="Temoignages" class="hidden">
+            <h2 class="text-xl font-bold mb-4">Liste des Témoignages</h2>
+            <table class="min-w-full border-collapse border border-gray-200 bg-white">
+                <thead>
+                    <tr>
+                        <th class="border border-gray-200 p-2">ID Témoignage</th>
+                        <th class="border border-gray-200 p-2">Commentaire</th>
+                        <th class="border border-gray-200 p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($Temoignages as $Temoignages): ?>
+                    <tr>
+                        <td class="border border-gray-200 p-2"><?php echo $Temoignages['id_temoignage']; ?></td>
+                        <td class="border border-gray-200 p-2"><?php echo $Temoignages['commentaire']; ?></td>
+                        <td class="border border-gray-200 p-2">
+                            <form method="POST" action="confirm_delete.php">
+                                <input type="hidden" name="id_temoignages" value="<?php echo $Temoignages['id_temoignage']; ?>">
+                                <input type="hidden" name="type" value="temoignages">
+                                <button type="submit" class="bg-red-600 text-white p-1 rounded w-full">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     function showSection(sectionId) {
-        const sections = ['dashboard', 'offres', 'projets', 'utilisateurs', 'freelancers', 'categorier', 'sous_categories'];
+        const sections = ['dashboard', 'offres', 'projets', 'utilisateurs', 'freelancers', 'categorier', 'sous_categories' , 'Temoignages'];
         sections.forEach(section => {
         document.getElementById(section).classList.add('hidden');
         });
         document.getElementById(sectionId).classList.remove('hidden');
     }
 
-    function showUpdateForm(id, titre, description, etat) {
+    function showUpdateForm(id, etat) {
         document.getElementById('update_id_projet').value = id;
-        document.getElementById('update_titre_projet').value = titre;
-        document.getElementById('update_description').value = description;
         document.getElementById('update_etat').value = etat; 
         document.getElementById('updateForm').classList.remove('hidden');
     }
@@ -590,8 +591,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function hideUpdateForm() {
         document.getElementById('updateForm').classList.add('hidden');
     }
-
-    
 
     function showUpdateCategoryForm(id, nom) {
         document.getElementById('update_id_categorie').value = id;
