@@ -20,18 +20,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Veuillez entrer une adresse email valide.";
     }
 
-    // Validation du mdp
+    // Validation du mot de passe
     if (strlen($password) < 6) {
         $errors[] = "Le mot de passe doit contenir au moins 6 caractères.";
     }
 
-    // Insertion dans la base de données
+    // Si aucune erreur, procéder à l'insertion
     if (empty($errors)) {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT); // Hachage du mot de passe
 
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT); 
+        // Insertion dans la base de données
         $stmt = $pdo->prepare("INSERT INTO utilisateurs (nom_utilisateur, email, mot_de_passe) VALUES (:nom_utilisateur, :email, :mot_de_passe)");
         if ($stmt->execute(['nom_utilisateur' => $nom_utilisateur, 'email' => $email, 'mot_de_passe' => $passwordHash])) {
-            $success = "Inscription réussie. Vous pouvez vous connecter.";
+            header('Location: login.php');
+            exit();
         } else {
             $error = "Erreur lors de l'inscription.";
         }
@@ -45,57 +47,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const form = document.querySelector("form");
-            form.addEventListener("submit", function(event) {
-                const nomUtilisateur = form.nom_utilisateur.value.trim();
-                const email = form.email.value.trim();
-                const password = form.password.value.trim();
-                let valid = true;
-
-                // Validation du nom d'utilisateur
-                if (nomUtilisateur.length < 3) {
-                    alert("Le nom d'utilisateur doit contenir au moins 3 caractères.");
-                    valid = false;
-                }
-
-                // Validation de l'email
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(email)) {
-                    alert("Veuillez entrer une adresse email valide.");
-                    valid = false;
-                }
-
-                // Validation du mdp
-                if (password.length < 6) {
-                    alert("Le mot de passe doit contenir au moins 6 caractères.");
-                    valid = false;
-                }
-
-                if (!valid) {
-                    event.preventDefault(); 
-                }
-            });
-        });
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-blue-500 flex items-center justify-center h-screen">
-    <div class="bg-white p-10 rounded-lg shadow-lg w-96">
-        <img src="pic/siag_917x600.jpg" alt="Image d'inscription" class="w-full h-32 object-cover rounded-lg mb-4"> 
-        <h2 class="text-3xl font-bold text-center mb-6">Inscription</h2>
-        <form method="POST">
-            <input type="text" name="nom_utilisateur" placeholder="Nom d'utilisateur" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            <input type="email" name="email" placeholder="Email" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            <input type="password" name="password" placeholder="Mot de passe" required class="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            <button type=" submit" class="bg-blue-500 text-white p-3 rounded-lg w-full hover:bg-green-700 transition duration-200">S'inscrire</button>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 sm:mx-auto p-4 sm:p-8">
+        <div class="text-center mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Inscription</h1>
+            <p class="text-sm sm:text-base text-gray-600 mt-2">Créez votre compte</p>
+        </div>
+
+        <?php if(isset($error)): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded relative mb-4 text-sm sm:text-base" role="alert">
+                <span class="block sm:inline"><?php echo $error; ?></span>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="" class="space-y-4 sm:space-y-6">
+            <div>
+                <label for="nom_utilisateur" class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" name="nom_utilisateur" id="nom_utilisateur" required 
+                        class="block w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-md text-sm sm:text-base bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                        placeholder="Votre nom d'utilisateur">
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" name="email" id="email" required 
+                        class="block w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-md text-sm sm:text-base bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                        placeholder="Votre email">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" name="password" id="password" required 
+                        class="block w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-md text-sm sm:text-base bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                        placeholder="Votre mot de passe">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 sm:py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                    S'inscrire
+                </button>
+            </div>
         </form>
 
-        <?php if (isset($error)) echo "<p class='text-red-500 mt-4 text-center'>$error</p>"; ?>
-        <?php if (isset($success)) echo "<p class='text-green-500 mt-4 text-center'>$success</p>"; ?>
-        <p class="mt-4 text-center">Déjà inscrit ? <a href="login.php" class="text-blue-600 hover:underline">Connectez-vous ici</a></p>
+        <p class="mt-6 text-center text-sm sm:text-base text-gray-600">
+            Déjà inscrit? 
+            <a href="login.php" class="font-medium text-gray-600 hover:text-gray-500">Se connecter</a>
+        </p>
     </div>
 </body>
 </html>
